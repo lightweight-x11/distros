@@ -1,0 +1,244 @@
+#!/bin/sh
+# Check the mirrors
+# Author: Bobylev Aleksej <al/bobylev@gmail.com>, 2016-2017
+
+
+# Head
+
+cat <<EOT
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Check SliTaz Mirrors</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="slitaz.min.css">
+	<link rel="shortcut icon" href="starred.png">
+	<style>
+.a,.ta{background:#FFF !important; font-weight:bold;color:#B20000;}
+.b,.tb{background:hsl(  0, 100%, 90%) !important;}
+.c,.tc{background:hsl( 20, 100%, 90%) !important;}
+.d,.td{background:hsl( 40, 100%, 90%) !important;}
+.e,.te{background:hsl( 60, 100%, 90%) !important;}
+.f,.tf{background:hsl( 80, 100%, 90%) !important;}
+.g,.tg{background:hsl(100, 100%, 90%) !important;}
+.h,.th{background:hsl(120, 100%, 90%) !important;}
+.i,.ti{background:hsl(140, 100%, 90%) !important;}
+.j,.tj{background:hsl(160, 100%, 90%) !important;}
+.k,.n,.tk,.tn{background:hsl(180, 100%, 90%) !important;}
+.l,.tl{background:hsl(200, 100%, 90%) !important;}
+.m,.tm{background:hsl(220, 100%, 90%) !important;}
+.o,.to{background:hsl(240, 100%, 90%) !important;}
+.p,.tp{background:hsl(260, 100%, 90%) !important;}
+
+.u{color:#666;}
+tbody td {border-bottom: 1px solid #BBB !important;}
+ul{list-style-type: none;}
+
+.a,.b,.c,.d,.e,.f,.g,.h,.i,.j,.k,.l,.m,.n,.o,.p{display:none}
+.ia .a { display: table-row; }
+.ib .b { display: table-row; }
+.ic .c { display: table-row; }
+.id .d { display: table-row; }
+.ie .e { display: table-row; }
+.if .f { display: table-row; }
+.ig .g { display: table-row; }
+.ih .h { display: table-row; }
+.ii .i { display: table-row; }
+.ij .j { display: table-row; }
+.ik .k { display: table-row; }
+.il .l { display: table-row; }
+.im .m { display: table-row; }
+.in .n { display: table-row; }
+.io .o { display: table-row; }
+.ip .p { display: table-row; }
+.ix .u { display: none; }
+/*.iu .u { display: table-row; }*/
+	</style>
+</head>
+<body>
+<script>
+de=document.documentElement;
+de.className += (('ontouchstart' in de) ? ' touch':' no-touch');
+
+function toggleCheckBoxes(v) {
+	var inputs = document.getElementById('state').getElementsByTagName('input');
+	for (var i = 0; i < inputs.length; i++) inputs[i].checked = v;
+	changeBodyClasses();
+}
+function changeBodyClasses() {
+	de.className = (('ontouchstart' in de) ? 'touch':'no-touch');
+	var inputs = document.getElementById('state').getElementsByTagName('input');
+	for (var i = 0; i < inputs.length; i++) {
+		if (inputs[i].checked)
+			de.className += ' ' + inputs[i].className;
+	}
+	de.className += ((document.getElementById('unav').checked) ? ' iu':' ix');
+}
+</script>
+<header>
+	<h1><a href="http://mirror1.slitaz.org/">SliTaz Mirrors</a></h1>
+	<div class="network">
+		<a class="home" href="http://www.slitaz.org/"></a>
+		<a href="http://scn.slitaz.org/">Community</a>
+		<a href="http://doc.slitaz.org/">Doc</a>
+		<a href="http://forum.slitaz.org/">Forum</a>
+		<a href="http://pro.slitaz.org/">Pro</a>
+		<a href="https://slitaz.spreadshirt.net/">Shop</a>
+		<a href="http://bugs.slitaz.org">Bugs</a>
+		<a href="http://hg.slitaz.org/?sort=lastchange">Hg</a>
+		<a href="http://cook.slitaz.org/">Cook</a>
+	</div>
+</header>
+
+<div class="block"><div>
+	<div class="block_info">
+		<p>This service allows you to check the current status of the SliTaz mirrors,
+		as well as view the update log and cases of unavailability of mirror servers.</p>
+		<p>Note, mirror1.slitaz.org is the primary mirror, all the rest of mirrors
+		is synchronized with it. It seems that the mirrors have a certain schedule
+		to check for updates.</p>
+	</div>
+	<nav>
+		<p class="activity_more"><b>Server time:</b> $(date -u +"%d.%m.%Y %H:%M")</p>
+		<p class="activity_more"><b>Last check:</b> $(head -n1 check.date)</p>
+	</nav>
+</div></div>
+<main>
+EOT
+
+
+# Current state
+
+cat <<EOT
+<h2>The current state of servers
+EOT
+[ "$(tail -n+2 ./check.date)" != 'finished' ] && echo '(checking in progress!)'
+cat <<EOT
+</h2>
+<p>Legend for the “Freshness” column:</p>
+<ul>
+<li><img src="starred.png"> — server is synchronized with the mirror1 now;</li>
+<li><img src="semi-starred.png"> — server is synchronized with the previous state of mirror1;</li>
+<li><img src="non-starred.png"> — server synchronization is unsatisfactory.</li>
+</ul>
+<div class="large">
+<table id="state">
+	<thead>
+		<tr><th>Log</th><th>Server</th><th>      Freshness</th><th>Access</th></tr>
+	</thead>
+	<tbody>
+EOT
+
+datetime1=$(tac ./log | awk '{if($3=="a"&&NF==5){s++;if(s==1)print $4$5}}')
+datetime2=$(tac ./log | awk '{if($3=="a"&&NF==5){s++;if(s==2)print $4$5}}')
+
+awk -vdt1="$datetime1" -vdt2="$datetime2" '
+{
+	printf("<tr class=\"t%s\">", $1);
+	printf("<td><input type=\"checkbox\" class=\"i%s\" id=\"ni%s\" checked onchange=\"changeBodyClasses()\"></td>", $1, $1);
+	printf("<td><label for=\"ni%s\">%s</label></td>", $1, $2);
+	if ($3$4==dt1) sign="starred"
+	else if ($3$4==dt2) sign="semi-starred"
+	else sign="non-starred";
+	printf("<td><img src=\"%s.png\">  %s  %s</td><td>", sign, $3, $4);
+	split($5, u, "|");
+	prot1 = (index(u[1], "http://")) ? "http" : "ftp";
+	printf("<a href=\"%s\">[%s]</a> ", u[1], prot1);
+	if (u[2] != ".") {
+		prot2 = (index(u[2], "http://")) ? "http" : "ftp";
+		printf("<a href=\"%s\">[%s]</a> ", u[2], prot2);
+	}
+	printf("</td></tr>");
+}' ./status
+
+cat <<EOT
+	</tbody>
+</table>
+</div>
+
+ <label><input type="checkbox" checked onchange="toggleCheckBoxes(this.checked)"> Show all servers</label><br>
+ <label><input type="checkbox" id="unav" onchange="changeBodyClasses()"> Show unavailability</label>
+EOT
+
+
+
+# Log
+
+cat <<EOT
+<h2>Changelog of servers status</h2>
+<p>Select servers in the table above to see them in the log. Also specify whether you want to see cases of unavailability of servers.</p>
+<p>The following list in reverse order (the higher the later).</p>
+<div class="large">
+<table>
+<thead><tr><th>UTC</th><th>Server</th><th>Timestamp</th></tr></thead>
+<tbody>
+EOT
+
+tac ./log | awk '{
+	u = (NF==3) ? " u" : "";
+	printf("<tr class=\"%s%s\">", $3, u);
+
+	printf("<td>%s %s</td>", $1, $2);
+
+	if ($3=="a") n = "mirror1.slitaz.org";
+	if ($3=="b") n = "mirror.slitaz.org";
+	if ($3=="c") n = "gtlib.gatech.edu";
+	if ($3=="d") n = "download.tuxfamily.org";
+	if ($3=="e") n = "malibu.tuxfamily.net";
+	if ($3=="f") n = "mathematik.tu-darmstadt.de";
+	if ($3=="g") n = "distro.ibiblio.org";
+	if ($3=="h") n = "mirror.switch.ch";
+#	if ($3=="i") n = "rz.uni-kiel.de";
+	if ($3=="j") n = "uni-stuttgart.de";
+	if ($3=="k") n = "slitaz.c3sl.ufpr.br";
+	if ($3=="n") n = "opensuse.c3sl.ufpr.br";
+	if ($3=="l") n = "icm.edu.pl";
+	if ($3=="m") n = "br.debian.org";
+	if ($3=="o") n = "slitaz.mirror.garr.it";
+	if ($3=="p") n = "archlinuxvn.org";
+
+	printf("<td>%s</td>", n);
+
+	if (NF==3) {
+		printf("<td>unavailable</td>");
+	} else {
+		printf("<td>%s %s</td>", $4, $5);
+	}
+
+	printf("</tr>");
+}'
+
+cat <<EOT
+</tbody>
+</table>
+</div>
+</main>
+
+<footer>
+	<div>
+		Copyright © <span class="year"></span>
+		<a href="http://www.slitaz.org/">SliTaz</a>
+	</div>
+	<div>
+		Network:
+		<a href="http://scn.slitaz.org/">Community</a> ·
+		<a href="http://doc.slitaz.org/">Doc</a> ·
+		<a href="http://forum.slitaz.org/">Forum</a> ·
+		<a href="http://pkgs.slitaz.org/">Packages</a> ·
+		<a href="http://bugs.slitaz.org">Bugs</a> ·
+		<a href="http://hg.slitaz.org/?sort=lastchange">Hg</a>
+	</div>
+	<div>
+		SliTaz @
+		<a href="http://twitter.com/slitaz">Twitter</a> ·
+		<a href="http://www.facebook.com/slitaz">Facebook</a> ·
+		<a href="http://distrowatch.com/slitaz">Distrowatch</a> ·
+		<a href="http://en.wikipedia.org/wiki/SliTaz">Wikipedia</a> ·
+		<a href="http://flattr.com/profile/slitaz">Flattr</a>
+	</div>
+</footer>
+<script>changeBodyClasses()</script>
+</body>
+	</html>
+EOT

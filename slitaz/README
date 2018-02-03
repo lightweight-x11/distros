@@ -1,0 +1,33 @@
+--------------------------------------------------------------------------------
+
+SliTaz GNU/Linux mirror - http://www.slitaz.org/
+
+--------------------------------------------------------------------------------
+
+
+  * /boot      --> Files used to boot from boot.slitaz.org.
+  * /iso       --> Bootable ISO images.
+  * /packages  --> Packages *.tazpkg for SliTaz.
+  * /pxe       --> The menu files used by the PXE boot.
+  * /sources   --> Tools and utilities distributed by SliTaz.
+  * rolling-date.sh displays date of current rolling ISO.
+
+SliTaz is a small free Linux distribution operating in memory (RAM).
+Linux Kernel, Busybox, and free software from the GNU project are used.
+Web site: www.kernel.org, www.busybox.net, and www.gnu.org.
+
+
+Copyright (c)  2007-2018  SliTaz GNU/Linux - GNU General Public License
+
+SliTaz GNU/Linux is distributing under the GNU General Public License,
+as published by the Free Software Foundation, version 2 of the License, or
+(at your opinion) any later version.
+
+                            ____  _ _ _____
+                           / ___|| (_)_   _|_ _ ____
+                           \___ \| | | | |/ _` |_  /
+                            ___) | | | | | (_| |/ /
+                           |____/|_|_| |_|\__,_/___|
+
+--------------------------------------------------------------------------------
+

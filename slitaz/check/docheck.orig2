@@ -1,0 +1,49 @@
+#/bin/sh
+
+dir="/var/www/mirror/check"
+log="$dir/log"
+chk="$dir/check.date"
+status="$dir/status"
+#updates=''
+
+date -u +"%d.%m.%Y %R" > "$chk"
+rm "$status"
+
+while read a n i u; do
+	idate=$(busybox wget -O - -T 60 ${i}packages/5.0/IDs | awk '{print $2}');
+
+	stored=$(cat $dir/$a)
+
+	if [ "$idate" != "$stored" ]; then
+		echo -n "$(date -u +"%d.%m.%Y %R") $a" >> "$log";
+		if [ -n "$idate" ]; then
+			date -u --date=@$idate +' %d.%m.%Y %T' >> "$log";
+			echo "$idate" > "$dir/$a";
+		else
+			echo >> "$log";
+		fi
+#		updates='yes'
+	fi
+
+	printf "%s %s %s %s\n" "$a" "$n" "$(date -u --date=@$stored +'%d.%m.%Y %T')" "$i|$u" >> "$status";
+
+done <<EOT
+a	mirror1.slitaz.org	http://mirror1.slitaz.org/	.
+b	mirror.slitaz.org	http://mirror.slitaz.org/	.
+c	gtlib.gatech.edu	http://www.gtlib.gatech.edu/pub/slitaz/	ftp://ftp.gtlib.gatech.edu/pub/slitaz/
+d	download.tuxfamily.org	http://download.tuxfamily.org/slitaz/	ftp://download.tuxfamily.org/slitaz/
+e	malibu.tuxfamily.net	http://malibu.tuxfamily.net/slitaz/	ftp://malibu.tuxfamily.net/slitaz/
+f	mathematik.tu-darmstadt.de	ftp://fb04272.mathematik.tu-darmstadt.de/pub/linux/distributions/slitaz/	ftp://linux.mathematik.tu-darmstadt.de/pub/linux/distributions/misc/slitaz/
+g	distro.ibiblio.org	http://distro.ibiblio.org/slitaz/	ftp://distro.ibiblio.org/slitaz/
+h	mirror.switch.ch	http://mirror.switch.ch/ftp/mirror/slitaz/	ftp://mirror.switch.ch/mirror/slitaz/
+j	uni-stuttgart.de	http://ftp.uni-stuttgart.de/slitaz/	ftp://ftp.uni-stuttgart.de/slitaz/
+k	slitaz.c3sl.ufpr.br	http://slitaz.c3sl.ufpr.br/	ftp://slitaz.c3sl.ufpr.br/slitaz/
+n	opensuse.c3sl.ufpr.br	ftp://opensuse.c3sl.ufpr.br/slitaz/	.
+l	icm.edu.pl	ftp://ftp.icm.edu.pl/vol/rzm5/linux-ibiblio/distributions/slitaz/	.
+m	br.debian.org	ftp://ftp.br.debian.org/slitaz/	.
+o	slitaz.mirror.garr.it	http://slitaz.mirror.garr.it/mirrors/slitaz/	ftp://slitaz.mirror.garr.it/mirrors/slitaz/
+p	archlinuxvn.org	http://f.archlinuxvn.org/slitaz/	.
+EOT
+
+#[ -n "$updates" ] && echo >> $log
+echo "finished" >> "$chk"

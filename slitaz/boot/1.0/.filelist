@@ -1,0 +1,1 @@
+a:2:{i:0;a:5:{s:4:"name";s:14:"rootfs-mini.gz";s:4:"size";s:7:"6305984";s:7:"modtime";s:10:"1377558000";s:10:"modtimeasc";s:20:"2013-Aug-27 01:00:00";s:9:"file_type";s:18:"application/x-gzip";}i:1;a:5:{s:4:"name";s:7:"bzImage";s:4:"size";s:7:"1635472";s:7:"modtime";s:10:"1377558000";s:10:"modtimeasc";s:20:"2013-Aug-27 01:00:00";s:9:"file_type";s:24:"application/octet-stream";}}
